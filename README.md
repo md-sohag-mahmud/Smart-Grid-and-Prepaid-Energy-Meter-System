@@ -1,34 +1,47 @@
 # ⚡ IoT-Based Smart Prepaid Energy Meter with Dual-Source Switching & Overcurrent Protection
 
-An advanced Smart Grid and Prepaid Energy Metering System integrated with IoT and automation to monitor real-time power consumption, enable secure remote recharge, handle dual-source load switching, and protect household appliances from overcurrent damages.
+An advanced Smart Grid and Hybrid Prepaid Energy Metering System integrated with IoT automation to monitor real-time power consumption, enable secure cloud-based recharge, handle automated dual-source load switching, and enforce protective system safeguards.
 
-## 📊 System Architecture & Diagrams
+## 📊 System Architecture & Schematics
+The system flow and physical wiring schematics are fully documented below:
 
-
-### 1. Functional Block Diagram
+### 1. Functional System Block Diagram
 ![Block Diagram](Images/Block%20Diagram.png)
 
-### 2. Complete Circuit Connection Diagram
+### 2. Physical Circuit Connection Diagram
 ![Connection Diagram](Images/Connection%20Diagram.png)
 
-## 🌟 Core Features & Modules
-- **Prepaid & Remote Cloud Recharge:** Tracks live balance and unit consumption, triggering automatic power cut-offs when credit hits zero. Users can recharge instantly via the cloud network.
-- **Dual-Source Intelligent Switching:** Automates seamless transfer between two distinct power sources (e.g., Grid Power and Solar/Generator Backup) using relay modules based on availability or tariff structures.
-- **Smart Overcurrent Protection:** Continuously monitors current thresholds; triggers an instant circuit cut-off and emergency buzzer when overcurrent/overload conditions are detected.
-- **Cloud Analytics & Display:** Streams real-time current, voltage, wattage, and remaining credit directly to an LCD display on-board and synchronizes metrics to the IoT cloud app.
+## 🌟 Core Features & Functional Logic
+- **Cloud-Enabled Prepaid System:** Tracks dynamic balance in Taka (configured at 7 Tk/Unit). Automatically triggers a total power cut-off via high-voltage relay units the moment the balance hits zero.
+- **Intelligent Dual-Source Auto Switching:** Continuously polls a dedicated DC/Solar sense line (`D7`). Automatically shifts the load from AC Main Supply (220V) to Backup Solar/DC Source (12V Battery) seamlessly during outages or zero-balance status.
+- **Non-Blocking Power Telemetry:** Executes true RMS non-blocking current sampling using the **ACS712 sensor** mapped to analog node `A0` via a custom voltage divider circuit.
+- **Live Local & Cloud Sync:** Streams real-time Wattage, Current, Source Type, and remaining Taka Balance concurrently to an on-board **16x2 I2C LCD screen** and the **Blynk IoT Cloud Dashboard**.
 
-## 🛠️ Hardware & Components Used
-- **Microcontroller:** NodeMCU ESP8266 / ESP32 / Arduino Mega
-- **Sensing Arrays:** ACS712 Current Sensor, ZMPT101B Voltage Sensor (or PZEM-004T Module)
-- **Actuators & Switches:** SPDT Relay Modules for power line isolation and source switching
-- **User Interface:** 16x2 I2C LCD Display, Emergency Warning Buzzer
+## 🛠️ Hardware Interfacing Profile (NodeMCU ESP8266)
 
-## 📁 Repository Structure
-- `Code/` : Complete firmware code (`sketch_jun11a.ino`) optimized for embedded controllers.
-- `Docs/` : Academic reports, functional block diagrams, and system analysis papers.
-- `Images/` : Hardware connection schematics and system design block diagrams.
-- `Results/` : Real-time hardware prototyping snapshots and implementation images.
+| Sub-Block | Target Component | Component Pin | NodeMCU Node | Operational Logic |
+| :--- | :--- | :---: | :---: | :--- |
+| **Control & UI** | I2C LCD Display (1602) | SDA / SCL | `D2` / `D1` | Local status telemetry matrix |
+| **Power Switching**| 2-Channel Relay Module | IN1 (AC) / IN2 (DC)| `D3` / `D6` | Active LOW switching loop |
+| **Telemetry Node** | ACS712 Current Sensor | OUT (Analog) | `A0` | Linked via 10k/20k divider array |
+| **Source Sensor**  | Voltage Divider Circuit| Solar/DC Sense | `D7` | Monitored via absolute digital read |
 
-## 🚀 Future Scopes
-1. **Net Metering for Solar Grids:** Implementing bi-directional energy tracking to allow users to sell excess solar power back to the main grid.
-2. **AI-Driven Load Forecasting:** Using machine learning algorithms to analyze historical consumption patterns and predict monthly energy costs for users.
+## 🌐 Blynk IoT Virtual Pin Mapping
+The cloud framework is configured under Template ID `TMPL6_CLaR165` using the following data streams:
+- **`V0` (Input):** Remote Credit Balance Recharge Channel.
+- **`V1` (Output):** Live Credit Balance Stream (Tk).
+- **`V2` (Output):** Real-Time Calculated Power (Watts).
+- **`V3` (Output):** Real-Time Measured Load Current (Amps).
+- **`V4` (Output):** Current Active Power Source Status (`AC MAIN` / `SOLAR` / `CUT-OFF`).
+
+## 📁 Repository Directory Structure
+- `Code/` : Production-ready firmware configuration file (`sketch_jun11a.ino`).
+- `Docs/` : Full theoretical system documentation, parameters, and structural design blueprints.
+- `Images/` : System architecture block diagrams and clean operational schematics.
+- `Results/` : High-resolution physical hardware prototyping snapshots and performance metrics.
+
+## 🚀 Engineering Future Scopes
+- **Hardware Anti-Tampering System:** Integration of physical limit switches or specialized IR sensor fields to trigger hard lockouts and send automated theft alerts to the utility network upon illegal case opening.
+- **True RMS AC Voltage Monitoring:** Implementation of a **ZMPT101B Voltage Sensor** layer to move away from fixed 220V software assumptions and prevent hardware damage from overvoltage/undervoltage fluctuations.
+- **Time-of-Use (ToU) Tariff Billing:** Addition of a hardware **DS3231 Real-Time Clock (RTC)** to support variable algorithmic tariff calculation structures between peak and off-peak utility periods.
+- **Predictive AI Load Forecasting:** Training edge machine learning regression models to evaluate household consumption parameters and forecast balance depletion lifecycles dynamically.
